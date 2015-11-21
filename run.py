@@ -8,7 +8,7 @@
     :copyright: (c) 2015 by Armin Ronacher.
     :license: BSD, see LICENSE for more details.
 """
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, url_for
 import urllib2
 from flask.ext.mail import Mail,Message
 from config import ADMINS
@@ -20,6 +20,7 @@ from apscheduler.scheduler import Scheduler
 
 FULL = 0
 OPEN = 1
+BASEURL = "jpatrickpark.com"
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -31,7 +32,7 @@ cron.start()
 def add_numbers():
     a = request.args.get('a', 0, type=int)
     b = request.args.get('b', 0, type=str)
-    print b
+    #print generate_removal_url(a,b)
     response = urllib2.urlopen("https://www.reg.uci.edu/perl/WebSoc?YearTerm=2016-03&ShowFinals=1&ShowComments=1&CourseCodes={}".format(str(a)))
     html = response.read()
     found = html.find("FULL")
@@ -48,27 +49,30 @@ def add_numbers():
         #add to database here
         return jsonify(result="The class is FULL! We will email you when the class becomes available.")
 
-def generate_removal_url():
+def generate_removal_url(course,user):
     '''generate a link that calls remove_pair() function when clicked'''
-    pass
+    return '/_remove_pair?courseID={}&userID={}'.format(str(course),user)
 
-@app.route('/_...')
+@app.route('/_remove_pair', methods=['GET'])
 def remove_pair():
     '''Removes a pair when a user clicks a specific link'''
     '''Must error-check'''
-    pass
+    '''127.0.0.1:5000/_remove_pair?courseID=VVV&userID=XXX'''
+    print request.args.get('courseID')
+    print request.args.get('userID')
+    return render_template('thanks.html')
 
 @cron.interval_schedule(minutes=1)
 def check_courses():
     '''goes through the database every minute, updates status, and send emails if any class "becomes available".'''
+    #send_email(29090,'jungkyup')
     pass
-    #send_email(29090)
 
 #@app.route('/_send_email')
-def send_email(courseID,ListofEmails):
-    msg = Message('Your class {} became available!'.format(str(courseID)), sender=ADMINS[0], recipients=ListofEmails)
-    msg.body = 'Your class {} became available!'.format(str(courseID))
-    #msg.html = '<b>HTML</b> body'
+def send_email(courseID,userID):
+    msg = Message('Your class {} became available! from MyUCIClassisFull'.format(str(courseID)), sender=ADMINS[0], recipients=[userID+'@uci.edu'])
+    #msg.body = 'Your class {} became available!'.format(str(courseID))
+    msg.html = 'Your class <strong> {} </strong> became available! <p> Go enroll in your class on WebReg. <p> If you succeeded in enrolling in the class and want to stop getting this email, click this link to <a href = "{}">unsubscribe</a>. '.format(str(courseID), BASEURL+generate_removal_url(courseID,userID))
     thr = Thread(target=send_async_email,args=[app,msg])
     thr.start()
 
