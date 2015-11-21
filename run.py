@@ -40,14 +40,14 @@ def add_numbers():
         waitlist = html.find("Waitl")
         if waitlist == -1:
             if html.find("OPEN") != -1:
-                return jsonify(result="The class is OPEN! Go to Webreg and enroll now!")
+                return jsonify(result="The class {} is OPEN! Go to Webreg and enroll now!".format(str(a)))
             else:    
-                return jsonify(result="The course does not exist!")
+                return jsonify(result="The course {} does not exist!".format(str(a)))
         else:
-            return jsonify(result="The class is FULL, but the WAITLIST is still open! Go ahead and get in the waitlist!")
+            return jsonify(result="The class {} is FULL, but the WAITLIST is still open! Go ahead and get in the waitlist!".format(str(a)))
     else:
         #add to database here
-        return jsonify(result="The class is FULL! We will email you when the class becomes available.")
+        return jsonify(result="The class {} is FULL! We will email you when the class becomes available.".format(str(a)))
 
 def generate_removal_url(course,user):
     '''generate a link that calls remove_pair() function when clicked'''
