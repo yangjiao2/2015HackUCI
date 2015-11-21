@@ -13,14 +13,19 @@ import urllib2
 from flask.ext.mail import Mail,Message
 from config import ADMINS#, MAIL_SERVER,MAIL_PORT,MAIL_HOSTNAME,MAIL_PASSWORD,MAIL_USE_TLS,MAIL_USE_SSL
 from threading import Thread
+import atexit
+from apscheduler.scheduler import Scheduler
+# use apscheduler version 2.1.2
+# pip install apscheduler==2.1.2
 
 app = Flask(__name__)
 app.config.from_object('config')
 mail = Mail(app)
+cron = Scheduler(daemon=True)
+cron.start()
 
 @app.route('/_add_numbers')
 def add_numbers():
-    """Add two numbers server side, ridiculous but well..."""
     a = request.args.get('a', 0, type=int)
     response = urllib2.urlopen("https://www.reg.uci.edu/perl/WebSoc?YearTerm=2016-03&ShowFinals=1&ShowComments=1&CourseCodes={}".format(str(a)))
     html = response.read()
@@ -35,6 +40,11 @@ def add_numbers():
     else:
         #add to database here
         return jsonify(result="FULL")
+
+@cron.interval_schedule(minutes=1)
+def check_courses():
+    pass
+    #send_email(29090)
 
 #@app.route('/_send_email')
 def send_email(courseID):
