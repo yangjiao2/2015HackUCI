@@ -20,7 +20,7 @@ from apscheduler.scheduler import Scheduler
 
 FULL = 0
 OPEN = 1
-BASEURL = "jpatrickpark.com"
+BASEURL = "https://myuciclassisfull.herokuapp.com"
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -46,18 +46,34 @@ def add_numbers():
         else:
             return jsonify(result="The class {} is FULL, but the WAITLIST is still open! Go ahead and get in the waitlist!".format(str(a)))
     else:
-        #add to database here
+        #add to database
         return jsonify(result="The class {} is FULL! We will email you when the class becomes available.".format(str(a)))
+
+def generate_add_url(course,user):
+    '''generate a link that calls add_pair() function when clicked'''
+    return '/_add_pair?courseID={}&userID={}'.format(str(course),user)
 
 def generate_removal_url(course,user):
     '''generate a link that calls remove_pair() function when clicked'''
     return '/_remove_pair?courseID={}&userID={}'.format(str(course),user)
 
+def add_pair_from_main(courseID,userID):
+    pass
+
+@app.route('/_add_pair', methods=['GET'])
+def add_pair():
+    '''Removes a pair when a user clicks a specific link'''
+    '''Must error-check'''
+    '''Do something about these two values with database'''
+    print request.args.get('courseID')
+    print request.args.get('userID')
+    return render_template('you_are_back_on.html')
+
 @app.route('/_remove_pair', methods=['GET'])
 def remove_pair():
     '''Removes a pair when a user clicks a specific link'''
     '''Must error-check'''
-    '''127.0.0.1:5000/_remove_pair?courseID=VVV&userID=XXX'''
+    '''Do something about these two values with database'''
     print request.args.get('courseID')
     print request.args.get('userID')
     return render_template('thanks.html')
@@ -65,14 +81,17 @@ def remove_pair():
 @cron.interval_schedule(minutes=1)
 def check_courses():
     '''goes through the database every minute, updates status, and send emails if any class "becomes available".'''
-    #send_email(29090,'jungkyup')
+    #send_email(29090,'jungkyup',0)
     pass
 
 #@app.route('/_send_email')
-def send_email(courseID,userID):
+def send_email(courseID,userID,is_unsubscribe):
     msg = Message('Your class {} became available! from MyUCIClassisFull'.format(str(courseID)), sender=ADMINS[0], recipients=[userID+'@uci.edu'])
     #msg.body = 'Your class {} became available!'.format(str(courseID))
-    msg.html = 'Your class <strong> {} </strong> became available! <p> Go enroll in your class on WebReg. <p> If you succeeded in enrolling in the class and want to stop getting this email, click this link to <a href = "{}">unsubscribe</a>. '.format(str(courseID), BASEURL+generate_removal_url(courseID,userID))
+    if is_unsubscribe:
+        msg.html = 'Your notification for class number <strong> {} </strong> is now unsubscribed! <p> If you believe this is a mistake, click this link to <a href="{}">subscribe</a> again!'.format(str(courseID), BASEURL+generate_add_url(courseID,userID))
+    else:
+        msg.html = 'Your class <strong> {} </strong> became available! <p> Go enroll in your class on WebReg. <p> If you succeeded in enrolling in the class and want to stop getting this email, click this link to <a href = "{}">unsubscribe</a>. '.format(str(courseID), BASEURL+generate_removal_url(courseID,userID))
     thr = Thread(target=send_async_email,args=[app,msg])
     thr.start()
 
