@@ -1,27 +1,25 @@
-from app.models import User, Follow, Course
-from app import create_app, db
-import unittest
+from database import *
+FULL = 0
+OPEN = 1
+get_db()
+print (get_notified_users(12000))
+print (get_courses())
+print (add_following_course("'hua@uci.edu'", 12000))
+print (add_following_course("'huh@uci.edu'", 12000))
+print (add_following_course("'hub@uci.edu'", 12000))
+print (add_following_course("'hub@uci.edu'", 12001))
+print (get_courses())
+print (get_notified_users(12000))
+print (get_notified_users(12001))
+print (delete_following_course("'hub@uci.edu'", 12000))
+print (get_courses())
+print (get_notified_users(12000))
+print (get_notified_users(12001))
 
-class UserModelTestCase(unittest.TestCase):
-	def testFollows(self):
 
-	    u1 = User(email='john@example.com', password='cat')
-        u2 = User(email='susan@example.org', password='dog')
-        db.session.add(u1)
-        db.session.add(u2)
-        db.session.commit()
-        self.assertFalse(u1.is_following(u2))
-        self.assertFalse(u1.is_followed_by(u2))
-        timestamp_before = datetime.utcnow()
-        u1.follow(u2)
-        db.session.add(u1)
-        db.session.commit()
-        timestamp_after = datetime.utcnow()
-        self.assertTrue(u1.is_following(u2))
-        self.assertFalse(u1.is_followed_by(u2))
-        self.assertTrue(u2.is_followed_by(u1))
-        self.assertTrue(u1.followed.count() == 2)
-        self.assertTrue(u2.followers.count() == 2)
-        f = u1.followed.all()[-1]
-        self.assertTrue(f.followed == u2)
-        self.assertTrue(timestamp_before <= f.timestamp <= timestamp_after)
+print (is_status_changed(12000, FULL))
+print get_courses_tuple()
+print (is_status_changed(12000, OPEN))
+print get_courses_tuple()
+print (is_status_changed(12000, OPEN))
+print get_courses_tuple()
