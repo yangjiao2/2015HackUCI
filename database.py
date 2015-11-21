@@ -110,13 +110,16 @@ def add_following_course(user_email, course_id):
     user_id = 0
     cur = db.cursor().execute('SELECT user_id FROM users WHERE email = ?', [user_email])
     user_exist_result = cur.fetchall()
+    print user_exist_result
     if user_exist_result == []:
         cur = db.cursor().execute('SELECT max(user_id) FROM users')
         max_id = cur.fetchone()
-        if type(max_id) != int:
+        print max_id
+        if max_id == None:
             max_id = 0
         else:
             max_id = max_id[0]
+        print max_id
 
         db.cursor().execute('INSERT INTO users (user_id , email) VALUES (?, ?)', [max_id + 1, user_email])
         db.commit()

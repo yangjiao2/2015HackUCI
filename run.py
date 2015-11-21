@@ -30,6 +30,8 @@ mail = Mail(app)
 cron = Scheduler(daemon=True)
 cron.start()
 
+halfthetime=0
+
 @app.route('/_add_numbers')
 def add_numbers():
     a = request.args.get('a', 0, type=int)
@@ -81,19 +83,27 @@ def remove_pair():
     send_email(cID,uID,1)
     return render_template('thanks.html')
 
+def return_0_or_1():
+    halfthetime=!halfthetime
+    return halfthetime
+
 @cron.interval_schedule(minutes=1)
 def check_courses():
     '''goes through the database every minute, updates status, and send emails if any class "becomes available".'''
+    #if halfthetime:
     # I iterate through the courses and send email for everyone
     courseList = get_courses()
     for i in courseList:
-        print courseList
-        userList = get_notified_users(i)
-        for user in userList:
-            print userList
-            #send_email(i,user,0)
+        #response = urllib2.urlopen("https://www.reg.uci.edu/perl/WebSoc?YearTerm=2016-03&ShowFinals=1&ShowComments=1&CourseCodes={}".format(str(i)))
+        #html = response.read()
+        #found = html.find("FULL")
+        #is_i_open = (html.find("FULL")==-1)
+        is_i_open = return_0_or_1()
+        if is_status_changed(i,is_i_open):
+            userList = get_notified_users(i)
+            for user in userList:
+                send_email(i,user,0)
 
-#@app.route('/_send_email')
 def send_email(courseID,userID,is_unsubscribe):
     msg = Message('Your class {} became available! from MyUCIClassisFull'.format(str(courseID)), sender=ADMINS[0], recipients=[userID+'@uci.edu'])
     #msg.body = 'Your class {} became available!'.format(str(courseID))
@@ -113,4 +123,4 @@ def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=33507)
+    app.run(debug=True, port=33507, use_reloader=False)
