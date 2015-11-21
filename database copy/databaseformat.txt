@@ -1,0 +1,15 @@
+users
+user_id, email
+
+follows
+index, interested_user_id, course_id
+
+courses
+course_id, status
+
+
+
+periodally check the status -> need to get all the courses in db
+
+delete_course
+check if no user is following that course
