@@ -58,6 +58,7 @@ def generate_removal_url(course,user):
     return '/_remove_pair?courseID={}&userID={}'.format(str(course),user)
 
 def add_pair_from_main(courseID,userID):
+    
     pass
 
 @app.route('/_add_pair', methods=['GET'])
