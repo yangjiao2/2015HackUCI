@@ -81,7 +81,7 @@ def remove_pair():
     send_email(cID,uID,1)
     return render_template('thanks.html')
 
-@cron.interval_schedule(seconds=5)
+@cron.interval_schedule(minutes=1)
 def check_courses():
     '''goes through the database every minute, updates status, and send emails if any class "becomes available".'''
     # I iterate through the courses and send email for everyone
@@ -91,7 +91,7 @@ def check_courses():
         userList = get_notified_users(i)
         for user in userList:
             print userList
-            #send_email(i,user,0)
+            send_email(i,user,0)
 
 #@app.route('/_send_email')
 def send_email(courseID,userID,is_unsubscribe):
