@@ -11,12 +11,15 @@
 from flask import Flask, jsonify, render_template, request
 import urllib2
 from flask.ext.mail import Mail,Message
-from config import ADMINS#, MAIL_SERVER,MAIL_PORT,MAIL_HOSTNAME,MAIL_PASSWORD,MAIL_USE_TLS,MAIL_USE_SSL
+from config import ADMINS
 from threading import Thread
 import atexit
 from apscheduler.scheduler import Scheduler
 # use apscheduler version 2.1.2
 # pip install apscheduler==2.1.2
+
+FULL = 0
+OPEN = 1
 
 app = Flask(__name__)
 app.config.from_object('config')
