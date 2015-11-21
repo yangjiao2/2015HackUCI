@@ -202,6 +202,6 @@ def is_status_changed(course_id, changed_status):
     course = prev.fetchone()
     print '==', course[0], course[1]
     db.execute('UPDATE courses SET status = ? WHERE course_id = ?', [changed_status, course_id])
-    return changed_status == course[1]
+    return changed_status != course[1]
 
 
