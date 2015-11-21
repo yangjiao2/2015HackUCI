@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block body %}
+<script type="text/javascript">
+  $(function() {
+    var submit_form = function(e) {
+      $.getJSON($SCRIPT_ROOT + '/_add_numbers', {
+        a: $('input[name="a"]').val(),
+      }, function(data) {
+        $('#result').text(data.result);
+        $('input[name=a]').focus().select();
+      });
+      return false;
+    };
+
+    $('a#calculate').bind('click', submit_form);
+
+    $('input[type=text]').bind('keydown', function(e) {
+      if (e.keyCode == 13) {
+        submit_form(e);
+      }
+    });
+
+    $('input[name=a]').focus();
+  });
+</script>
+<div class=wrapper-masthead">
+	<div class="container">
+		<header class="masthead clearfix">
+			<div class="site-info">
+				<h1 class="site-name">2015HACKUCI: My UCI Class is Full</h1>
+				<p class=site-description">Sends you email notification when the class you want to enroll in becomes available.</p>
+		</header>
+	</div>
+</div>
+<div id="main" role="main" class="container">
+	<p>
+  	Is a class with course number <input type="text" size="5" name="a"> available? <p> 
+  	<span id="result">Hit Search</span>
+	<p><a href=# id="calculate">Search</a>
+</div>
+{% endblock %}
