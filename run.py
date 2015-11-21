@@ -91,7 +91,7 @@ def check_courses():
         userList = get_notified_users(i)
         for user in userList:
             print userList
-            send_email(i,user,0)
+            #send_email(i,user,0)
 
 #@app.route('/_send_email')
 def send_email(courseID,userID,is_unsubscribe):
