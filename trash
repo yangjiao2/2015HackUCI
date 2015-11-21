@@ -1,0 +1,310 @@
+# -*- coding: utf-8 -*-
+"""
+    jQuery Example
+    ~~~~~~~~~~~~~~
+
+    A simple application that shows how Flask and jQuery get along.
+
+    :copyright: (c) 2015 by Armin Ronacher.
+    :license: BSD, see LICENSE for more details.
+"""
+from flask import Flask, jsonify, render_template, request, url_for
+import urllib2
+from flask.ext.mail import Mail,Message
+from config import ADMINS
+from threading import Thread
+import atexit
+from apscheduler.scheduler import Scheduler
+# use apscheduler version 2.1.2
+# pip install apscheduler==2.1.2
+#from database import *
+
+FULL = 0
+OPEN = 1
+import os, sqlite3
+from sqlite3 import dbapi2 as sqlite3
+from flask import Flask, request, session, g, redirect, url_for, abort, \
+     render_template, flash
+conn = None
+
+# # create our little application :)
+# app = Flask(__name__)
+
+# # Load default config and override config from an environment variable
+PATH = os.path.dirname(os.path.abspath(__file__))
+DATABASE = 'hackuci.db'
+SCHEMA = 'schema.sql'
+# app.config.update(dict(
+#     DATABASE=os.path.join(app.root_path, DATABASE),
+#     DEBUG=True,
+#     SECRET_KEY='development key',
+#     USERNAME='admin',
+#     PASSWORD='default'
+# ))
+# app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+
+
+
+def connect_db():
+    """Connects to the specific database."""
+    global conn
+    conn = sqlite3.connect(DATABASE)
+    return conn
+
+
+def init_db():
+    """Initializes the database."""
+    global conn
+    with sqlite3.connect(DATABASE) as conn:
+        with open(SCHEMA, 'rt') as f:
+            schema = f.read()
+        conn.executescript(schema)
+    return conn
+
+
+# # @app.cli.command('initdb')
+# def initdb_command():
+#     """Creates the database tables."""
+#     init_db()
+#     print('Initialized the database.')
+
+
+def get_db():
+    """Opens a new database connection if there is none yet for the
+    current application context.
+    """
+    global conn
+    if not os.path.exists(DATABASE):
+        init_db()
+    if not conn:
+        connect_db()
+    return conn
+ 
+
+
+# @app.teardown_appcontext
+def close_db():
+    """Closes the database again at the end of the request."""
+    if conn:
+        conn.close()
+
+
+#@app.route('/classes')
+def get_courses():
+    # try to get all the course_id
+    print '=> execute get_courses'
+    db = get_db()
+    cur = db.cursor().execute('SELECT course_id FROM courses ORDER BY course_id')
+    courses_tuple = cur.fetchall()
+    # return render_template('show_classes.html', courses=courses)
+    course_list = [course[0] for course in courses_tuple]
+    return course_list
+
+def get_courses_tuple():
+    # try to get all the course_id
+    print '=> execute get_courses'
+    db = get_db()
+    cur = db.cursor().execute('SELECT * FROM courses ORDER BY course_id')
+    courses_tuple = cur.fetchall()
+    return courses_tuple
+
+
+#@app.route('/add', methods=['POST'])
+def add_following_course(user_email, course_id):
+    # check if user_email is in the db.users, if not in, add a new user
+    # check if course_id is in the db.courses, if not in , add a new course
+    # add the pair to db.follows
+    print '=> execute add_following_course'
+    db = get_db()
+    user_id = 0
+    cur = db.cursor().execute('SELECT user_id FROM users WHERE email = ?', [user_email])
+    user_exist_result = cur.fetchall()
+    cur = db.cursor().execute('SELECT user_id FROM users WHERE email = ?', [user_email])
+    user_exist_result = cur.fetchall()
+    if user_exist_result == []:
+        cur = db.cursor().execute('SELECT max(user_id) FROM users')
+        max_id = cur.fetchone()
+        if max_id == None:
+            max_id = 0
+        else:
+            max_id = max_id[0]
+
+        db.cursor().execute('INSERT INTO users (user_id , email) VALUES (?, ?)', [max_id + 1, user_email])
+        db.commit()
+
+        cur = db.cursor().execute('SELECT * FROM users')
+        user_id = max_id + 1
+    else:
+        user_id = user_exist_result[0][0]  
+
+
+    cur = db.cursor().execute('SELECT course_id FROM courses WHERE course_id = ?', [course_id])
+    course_exist_result = cur.fetchall()
+    if course_exist_result == []:
+        db.cursor().execute('INSERT INTO courses (course_id, status) VALUES (?, ?)', [course_id, FULL])
+        db.commit()
+
+    cur = db.cursor().execute('SELECT follower_user_id, followed_course_id FROM follows WHERE follows.follower_user_id = ? AND follows.followed_course_id = ?', [user_id, course_id])
+    if cur.fetchall() == [] and user_id != 0:
+        db.cursor().execute('INSERT INTO follows(follower_user_id, followed_course_id) VALUES (?, ?)', [user_id, course_id])
+        db.commit()
+
+    return 'success'
+
+
+# @app.route('/add', methods=['POST'])
+def delete_following_course(user_email, course_id):
+    # check if user_email is in the db.users, if not in, add a new user
+    # check if course_id is in the db.courses, if not in , add a new course
+    # add the pair to db.follows
+    print '=> execute delete_following_course'
+    db = get_db()
+    user_id = 0
+
+    cur = db.cursor().execute('SELECT user_id FROM users WHERE email = ?', [user_email])
+    check_user_exist_result = cur.fetchall()
+    if check_user_exist_result == []:
+        return 'fail'
+    else:
+        user_id = check_user_exist_result[0][0]
+
+    cur = db.cursor().execute('SELECT follower_user_id, followed_course_id FROM follows WHERE follows.follower_user_id = ? AND follows.followed_course_id = ?', [user_id, course_id])
+    follow_exist_result = cur.fetchall()
+    if follow_exist_result == []:
+        return 'fail'
+    else:
+        cur = db.cursor().execute('DELETE FROM follows WHERE follows.follower_user_id = ? AND follows.followed_course_id = ?', [user_id, course_id])
+        db.commit()
+
+    cur = db.cursor().execute('SELECT follower_user_id, followed_course_id FROM follows WHERE follows.follower_user_id = ?', [user_id])
+    user_exist_result = cur.fetchall()
+    if user_exist_result == []:
+        db.cursor().execute('DELETE FROM users WHERE user_id = ?', [user_id])
+        db.commit()
+
+
+
+    cur = db.cursor().execute('SELECT follower_user_id, followed_course_id FROM follows WHERE follows.followed_course_id = ?', [course_id])
+    course_exist_result = cur.fetchall()
+    if course_exist_result == []:
+        db.cursor().execute('DELETE FROM courses WHERE course_id = ?', [course_id])
+        db.commit()
+
+    return 'success'
+
+
+def get_notified_users(course_id):
+    # get all the user's email that follows changed_course_id
+    db = get_db()
+    cur = db.cursor().execute('SELECT users.email FROM users, follows WHERE follows.followed_course_id = ? AND follows.follower_user_id = users.user_id', [course_id])
+    notified_users_tuple = cur.fetchall()
+    if notified_users_tuple == []:
+        return []
+
+    notified_users_list = [email[0] for email in notified_users_tuple]
+    return notified_users_list
+
+def is_status_changed(course_id, changed_status):
+    # get the course's status by given course_id
+    # return True or False whether the course_id is changed
+    # True if it changes, False if it is not changed
+    db = get_db()
+    prev = db.cursor().execute('SELECT * FROM courses WHERE course_id = ?', [course_id])
+    course = prev.fetchone()
+    print '==', course[0], course[1]
+    db.execute('UPDATE courses SET status = ? WHERE course_id = ?', [changed_status, course_id])
+    return changed_status != course[1]
+
+
+FULL = 0
+OPEN = 1
+get_db()
+BASEURL = "https://myuciclassisfull.herokuapp.com"
+
+app = Flask(__name__)
+app.config.from_object('config')
+mail = Mail(app)
+cron = Scheduler(daemon=True)
+cron.start()
+
+@app.route('/_add_numbers')
+def add_numbers():
+    a = request.args.get('a', 0, type=int)
+    b = request.args.get('b', 0, type=str)
+    #print generate_removal_url(a,b)
+    response = urllib2.urlopen("https://www.reg.uci.edu/perl/WebSoc?YearTerm=2016-03&ShowFinals=1&ShowComments=1&CourseCodes={}".format(str(a)))
+    html = response.read()
+    found = html.find("FULL")
+    if found == -1:
+        waitlist = html.find("Waitl")
+        if waitlist == -1:
+            if html.find("OPEN") != -1:
+                return jsonify(result="The class {} is OPEN! Go to Webreg and enroll now!".format(str(a)))
+            else:    
+                return jsonify(result="The course {} does not exist!".format(str(a)))
+        else:
+            return jsonify(result="The class {} is FULL, but the WAITLIST is still open! Go ahead and get in the waitlist!".format(str(a)))
+    else:
+        add_pair(a,b)
+        return jsonify(result="The class {} is FULL! We will email you when the class becomes available.".format(str(a)))
+
+def generate_add_url(course,user):
+    '''generate a link that calls add_pair() function when clicked'''
+    return '/_add_pair?courseID={}&userID={}'.format(str(course),user)
+
+def generate_removal_url(course,user):
+    '''generate a link that calls remove_pair() function when clicked'''
+    return '/_remove_pair?courseID={}&userID={}'.format(str(course),user)
+
+def add_pair(courseID,userID):
+    add_following_course(userID,int(courseID))
+
+@app.route('/_add_pair', methods=['GET'])
+def add_pair_from_link():
+    '''Removes a pair when a user clicks a specific link'''
+    '''Must error-check'''
+    '''Do something about these two values with database'''
+    add_pair(request.args.get('courseID'),request.args.get('userID'))
+    return render_template('you_are_back_on.html')
+
+@app.route('/_remove_pair', methods=['GET'])
+def remove_pair():
+    '''Removes a pair when a user clicks a specific link'''
+    '''Must error-check'''
+    '''Do something about these two values with database'''
+    uID = request.args.get('userID')
+    cID = int(request.args.get('courseID'))
+    delete_following_course(uID,cID)
+    send_email(cID,uID,1)
+    return render_template('thanks.html')
+
+@cron.interval_schedule(minutes=1)
+def check_courses():
+    '''goes through the database every minute, updates status, and send emails if any class "becomes available".'''
+    courseList = get_courses()
+    for i in courseList:
+        userList = get_notified_users(i)
+        for user in userList:
+            send_email(i,user,0)
+
+#@app.route('/_send_email')
+def send_email(courseID,userID,is_unsubscribe):
+    msg = Message('Your class {} became available! from MyUCIClassisFull'.format(str(courseID)), sender=ADMINS[0], recipients=[userID+'@uci.edu'])
+    #msg.body = 'Your class {} became available!'.format(str(courseID))
+    if is_unsubscribe:
+        msg.html = 'Your notification for class number <strong> {} </strong> is now unsubscribed! <p> If you believe this is a mistake, click this link to <a href="{}">subscribe</a> again!'.format(str(courseID), BASEURL+generate_add_url(courseID,userID))
+    else:
+        msg.html = 'Your class <strong> {} </strong> became available! <p> Go enroll in your class on WebReg. <p> If you succeeded in enrolling in the class and want to stop getting this email, click this link to <a href = "{}">unsubscribe</a>. '.format(str(courseID), BASEURL+generate_removal_url(courseID,userID))
+    thr = Thread(target=send_async_email,args=[app,msg])
+    thr.start()
+
+def send_async_email(app,msg):
+    with app.app_context():
+        mail.send(msg)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(debug=True, port=33507)

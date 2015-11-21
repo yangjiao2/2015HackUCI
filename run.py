@@ -17,9 +17,11 @@ import atexit
 from apscheduler.scheduler import Scheduler
 # use apscheduler version 2.1.2
 # pip install apscheduler==2.1.2
+from database import *
 
 FULL = 0
 OPEN = 1
+get_db()
 BASEURL = "https://myuciclassisfull.herokuapp.com"
 
 app = Flask(__name__)
@@ -46,7 +48,7 @@ def add_numbers():
         else:
             return jsonify(result="The class {} is FULL, but the WAITLIST is still open! Go ahead and get in the waitlist!".format(str(a)))
     else:
-        #add to database
+        add_pair(a,b)
         return jsonify(result="The class {} is FULL! We will email you when the class becomes available.".format(str(a)))
 
 def generate_add_url(course,user):
@@ -57,17 +59,15 @@ def generate_removal_url(course,user):
     '''generate a link that calls remove_pair() function when clicked'''
     return '/_remove_pair?courseID={}&userID={}'.format(str(course),user)
 
-def add_pair_from_main(courseID,userID):
-    
-    pass
+def add_pair(courseID,userID):
+    add_following_course(userID,int(courseID))
 
 @app.route('/_add_pair', methods=['GET'])
-def add_pair():
+def add_pair_from_link():
     '''Removes a pair when a user clicks a specific link'''
     '''Must error-check'''
     '''Do something about these two values with database'''
-    print request.args.get('courseID')
-    print request.args.get('userID')
+    add_pair(request.args.get('courseID'),request.args.get('userID'))
     return render_template('you_are_back_on.html')
 
 @app.route('/_remove_pair', methods=['GET'])
@@ -75,15 +75,23 @@ def remove_pair():
     '''Removes a pair when a user clicks a specific link'''
     '''Must error-check'''
     '''Do something about these two values with database'''
-    print request.args.get('courseID')
-    print request.args.get('userID')
+    uID = request.args.get('userID')
+    cID = int(request.args.get('courseID'))
+    delete_following_course(uID,cID)
+    send_email(cID,uID,1)
     return render_template('thanks.html')
 
-@cron.interval_schedule(minutes=1)
+@cron.interval_schedule(seconds=5)
 def check_courses():
     '''goes through the database every minute, updates status, and send emails if any class "becomes available".'''
-    #send_email(29090,'jungkyup',0)
-    pass
+    # I iterate through the courses and send email for everyone
+    courseList = get_courses()
+    for i in courseList:
+        print courseList
+        userList = get_notified_users(i)
+        for user in userList:
+            print userList
+            #send_email(i,user,0)
 
 #@app.route('/_send_email')
 def send_email(courseID,userID,is_unsubscribe):

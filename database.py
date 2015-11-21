@@ -39,7 +39,7 @@ SCHEMA = 'schema.sql'
 def connect_db():
     """Connects to the specific database."""
     global conn
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE,check_same_thread=False)
     return conn
 
 
@@ -113,7 +113,7 @@ def add_following_course(user_email, course_id):
     if user_exist_result == []:
         cur = db.cursor().execute('SELECT max(user_id) FROM users')
         max_id = cur.fetchone()
-        if max_id == None:
+        if type(max_id) != int:
             max_id = 0
         else:
             max_id = max_id[0]
