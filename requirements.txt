@@ -14,8 +14,7 @@ SQLAlchemy==1.0.5
 Werkzeug==0.8.3
 certifi==0.0.8
 chardet==1.0.1
-js.jquery
 django
+js.jquery
 js.bootstrap
 js.underscore
-django-fantastic
