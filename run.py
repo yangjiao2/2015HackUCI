@@ -33,7 +33,6 @@ def add_numbers():
     if found == -1:
         waitlist = html.find("Waitl")
         if waitlist == -1:
-            send_email(a)
             return jsonify(result="OPEN")
         else:
             return jsonify(result="Waitl")
