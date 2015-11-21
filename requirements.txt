@@ -18,3 +18,4 @@ js.jquery
 django
 js.bootstrap
 js.underscore
+django-fantastic
