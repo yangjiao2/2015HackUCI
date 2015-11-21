@@ -27,27 +27,43 @@ cron.start()
 @app.route('/_add_numbers')
 def add_numbers():
     a = request.args.get('a', 0, type=int)
+    b = request.args.get('b', 0, type=str)
+    print b
     response = urllib2.urlopen("https://www.reg.uci.edu/perl/WebSoc?YearTerm=2016-03&ShowFinals=1&ShowComments=1&CourseCodes={}".format(str(a)))
     html = response.read()
     found = html.find("FULL")
     if found == -1:
         waitlist = html.find("Waitl")
         if waitlist == -1:
-            return jsonify(result="OPEN")
+            if html.find("OPEN") != -1:
+                return jsonify(result="The class is OPEN! Go to Webreg and enroll now!")
+            else:    
+                return jsonify(result="The course does not exist!")
         else:
-            return jsonify(result="Waitl")
+            return jsonify(result="The class is FULL, but the WAITLIST is still open! Go ahead and get in the waitlist!")
     else:
         #add to database here
-        return jsonify(result="FULL")
+        return jsonify(result="The class is FULL! We will email you when the class becomes available.")
+
+def generate_removal_url():
+    '''generate a link that calls remove_pair() function when clicked'''
+    pass
+
+@app.route('/_...')
+def remove_pair():
+    '''Removes a pair when a user clicks a specific link'''
+    '''Must error-check'''
+    pass
 
 @cron.interval_schedule(minutes=1)
 def check_courses():
+    '''goes through the database every minute, updates status, and send emails if any class "becomes available".'''
     pass
     #send_email(29090)
 
 #@app.route('/_send_email')
-def send_email(courseID):
-    msg = Message('Your class {} became available!'.format(str(courseID)), sender=ADMINS[0], recipients=ADMINS)
+def send_email(courseID,ListofEmails):
+    msg = Message('Your class {} became available!'.format(str(courseID)), sender=ADMINS[0], recipients=ListofEmails)
     msg.body = 'Your class {} became available!'.format(str(courseID))
     #msg.html = '<b>HTML</b> body'
     thr = Thread(target=send_async_email,args=[app,msg])

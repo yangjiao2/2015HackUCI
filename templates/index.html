@@ -5,6 +5,7 @@
     var submit_form = function(e) {
       $.getJSON($SCRIPT_ROOT + '/_add_numbers', {
         a: $('input[name="a"]').val(),
+        b: $('input[name="b"]').val(),
       }, function(data) {
         $('#result').text(data.result);
         $('input[name=a]').focus().select();
@@ -28,14 +29,20 @@
 		<header class="masthead clearfix">
 			<div class="site-info">
 				<h1 class="site-name">2015HACKUCI: My UCI Class is Full</h1>
-				<p class=site-description">Sends you email notification when the class you want to enroll in becomes available.</p>
+				<p class=site-description">Sends you email notification to your @uci.edu email address when the class you want to enroll in becomes available.</p>
 		</header>
 	</div>
 </div>
 <div id="main" role="main" class="container">
 	<p>
-  	Is a class with course number <input type="text" size="5" name="a"> available? <p> 
-  	<span id="result">Hit Search</span>
-	<p><a href=# id="calculate">Search</a>
+  	Enter a 5-digit course number of the class you want to enroll in: <input type="text" size="5" name="a">  <p> 
+    Enter your UCINetID: <input type="text" size="20" name="b"><p>
+  	<span id="result"> And click the button below or press enter.</span>
+	<p><a href=# id="calculate">Notify me when the class is available!</a>
+    <!--<p><p>
+    Example: <p>
+  	Enter a 5-digit course number of the class you want to enroll in: 29100  <p> 
+    Enter your UCINetID: panteater<p>-->
+    
 </div>
 {% endblock %}
