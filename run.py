@@ -87,11 +87,14 @@ def check_courses():
     # I iterate through the courses and send email for everyone
     courseList = get_courses()
     for i in courseList:
-        print courseList
-        userList = get_notified_users(i)
-        for user in userList:
-            print userList
-            send_email(i,user,0)
+        response = urllib2.urlopen("https://www.reg.uci.edu/perl/WebSoc?YearTerm=2016-03&ShowFinals=1&ShowComments=1&CourseCodes={}".format(str(i)))
+        html = response.read()
+        found = html.find("FULL")
+        is_open = (found == -1)
+        if is_status_changed(i,is_open):
+            userList = get_notified_users(i)
+            for user in userList:
+                send_email(i,user,0)
 
 #@app.route('/_send_email')
 def send_email(courseID,userID,is_unsubscribe):
