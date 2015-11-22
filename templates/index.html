@@ -8,6 +8,25 @@
         b: $('input[name="b"]').val()
       }, function(data) {
         $('#result').text(data.result);
+        $('#signal').text(data.signal);
+        if (data.signal=='r'){
+        $(".drawX").remove();
+        $(".triangle").remove();
+        $(".circle").remove();
+        $('<div class="drawX">X</div>').insertBefore('.madeup');
+}
+        if (data.signal=='y'){
+        $(".drawX").remove();
+        $(".triangle").remove();
+        $(".circle").remove();
+        $('<div class="triangle"></div>').insertBefore('.madeup');
+}
+        if (data.signal=='g'){
+        $(".drawX").remove();
+        $(".triangle").remove();
+        $(".circle").remove();
+        $('<div class="circle">✓</div>').insertBefore('.madeup');
+}
         $('input[name=a]').focus().select();
       });
       return false;
@@ -29,15 +48,15 @@
 		<header class="masthead clearfix">
 			<div class="site-info">
 				<h1 class="site-name">My UCI Class is Full</h1>
-				<p class=site-description">Is a class you want to enroll in already full? Are you tired of constantly checking WebSog to find out whether there is a new spot? "My UCI Class is Full" can do that for you! This application sends you email notification to your @uci.edu email address when the class you want to enroll in becomes available.</p>
+				<p class="site-description">Is a class you want to enroll in already full? Are you tired of constantly checking WebSog to find out whether there is a new spot? "My UCI Class is Full" can do that for you! This application sends you email notification to your @uci.edu email address when the class you want to enroll in becomes available.</p>
 		</header>
 	</div>
 </div>
 <div id="main" role="main" class="container">
 	<p>
-  	Enter a <strong>5-digit course number</strong> of the class you want to enroll in: <input type="text" size="5" name="a">  <p> 
+  	Enter a <strong>5-digit course number</strong> of the class you want to enroll in: <input type="text" size="10" name="a">  <p> 
     Enter your <strong>UCINetID</strong>: <input type="text" size="20" name="b"><p>
-  	<span id="result"> Please <strong>click the button below</strong> or <strong>press enter.</strong></span>
+  	<div class="madeup"><span id="result"> Please <strong>click the button below</strong> or <strong>press enter.</strong></span></div>
 	<p>
     <div id="share-page"><a href=# id="calculate">Notify me when the class is available!</a></div>
 </div>
@@ -56,9 +75,9 @@ A: You can either send us an email to <a href="mailto:myuciclassisfull@gmail.com
 </div>
     <div class="wrapper-footer">
     <footer class="footer">
-    Share "My UCI Class is Full" on: <p><a href="https://facebook.com/sharer.php?u=https://myuciclassisfull.herokuapp.com/" rel="nofollow" target="_blank" title="Share on Facebook"><i class="svg-icon facebook"></i></a>
-    <a href="https://twitter.com/intent/tweet?text=My UCI Class is Full&url=https://myuciclassisfull.herokuapp.com/" rel="nofollow" target="_blank" title="Share on Twitter"><i class="svg-icon twitter"></i></a>
-    <a href="https://plus.google.com/share?url=https://myuciclassisfull.herokuapp.com/" rel="nofollow" target="_blank" title="Share on Google+"><i class="svg-icon googleplus"></i></a>
+    Share "My UCI Class is Full" on: <p><a href="https://facebook.com/sharer.php?u=https://myuciclassisfull.mybluemix.net/" rel="nofollow" target="_blank" title="Share on Facebook"><i class="svg-icon facebook"></i></a>
+    <a href="https://twitter.com/intent/tweet?text=My UCI Class is Full&url=https://myuciclassisfull.mybluemix.net" rel="nofollow" target="_blank" title="Share on Twitter"><i class="svg-icon twitter"></i></a>
+    <a href="https://plus.google.com/share?url=https://myuciclassisfull.mybluemix.net" rel="nofollow" target="_blank" title="Share on Google+"><i class="svg-icon googleplus"></i></a>
     <p>
     Created by: JP Park, Yang Jiao
     <p>

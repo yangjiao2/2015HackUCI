@@ -22,7 +22,7 @@ from database import *
 FULL = 0
 OPEN = 1
 get_db()
-BASEURL = "https://myuciclassisfull.herokuapp.com"
+BASEURL = "https://myuciclassisfull.mybluemix.net"
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -42,14 +42,14 @@ def add_numbers():
         waitlist = html.find("Waitl")
         if waitlist == -1:
             if html.find("OPEN") != -1:
-                return jsonify(result="The class {} is OPEN! Go to Webreg and enroll now!".format(str(a)))
+                return jsonify(signal="y",result="The class {} is OPEN! Go to Webreg and enroll now!".format(str(a)))
             else:    
-                return jsonify(result="The course {} does not exist!".format(str(a)))
+                return jsonify(signal="r",result="The course {} does not exist!".format(str(a)))
         else:
-            return jsonify(result="The class {} is FULL, but the WAITLIST is still open! Go ahead and get in the waitlist!".format(str(a)))
+            return jsonify(signal="y",result="The class {} is FULL, but the WAITLIST is still open! Go ahead and get in the waitlist!".format(str(a)))
     else:
         add_pair(a,b)
-        return jsonify(result="The class {} is FULL! We will email you when the class becomes available.".format(str(a)))
+        return jsonify(signal="g",result="The class {} is FULL! We will email you when the class becomes available.".format(str(a)))
 
 def generate_add_url(course,user):
     '''generate a link that calls add_pair() function when clicked'''
@@ -116,4 +116,4 @@ def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=33507)
+    app.run()
