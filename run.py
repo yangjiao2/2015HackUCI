@@ -98,11 +98,13 @@ def check_courses():
 
 #@app.route('/_send_email')
 def send_email(courseID,userID,is_unsubscribe):
-    msg = Message('Your class {} became available! from MyUCIClassisFull'.format(str(courseID)), sender=ADMINS[0], recipients=[userID+'@uci.edu'])
+    
     #msg.body = 'Your class {} became available!'.format(str(courseID))
     if is_unsubscribe:
+        msg = Message('Your have unsubscribed from MyUCIClassisFull for class {}!'.format(str(courseID)), sender=ADMINS[0], recipients=[userID+'@uci.edu'])
         msg.html = 'Your notification for class number <strong> {} </strong> is now unsubscribed! <p> If you believe this is a mistake, click this link to <a href="{}">subscribe</a> again!'.format(str(courseID), BASEURL+generate_add_url(courseID,userID))
     else:
+        msg = Message('Your class {} became available! from MyUCIClassisFull'.format(str(courseID)), sender=ADMINS[0], recipients=[userID+'@uci.edu'])
         msg.html = 'Your class <strong> {} </strong> became available! <p> Go enroll in your class on WebReg. <p> If you succeeded in enrolling in the class and want to stop getting this email, click this link to <a href = "{}">unsubscribe</a>. '.format(str(courseID), BASEURL+generate_removal_url(courseID,userID))
     thr = Thread(target=send_async_email,args=[app,msg])
     thr.start()
