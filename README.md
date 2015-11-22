@@ -9,19 +9,19 @@ Alternative solutions cost money because of their project's weight. We focused o
 
 ## How We built it
 We started from sample programs such as sample project using Flask which allowed us to start building and getting feedback right away.
-Then, we customized the sample project by adding additional fucntions, building our own database for our class, user, follow activities, implementing other web development features.
+Then, we customized the sample project by adding additional functions, building our own database for our class, user, follow activities, implementing other web development features.
 ## Challenges I ran into
-We had to struggle so much trying to remind ourselves of the programming languages we barely used.  Also, since this Hackathon elapses 36 hours,  we did not have enough time to be able to expand our program to something much greater with only two group members.
+We had to struggle so much trying to remind ourselves of the programming languages we barely used.  Also, we did not have enough time to be able to expand our program to something much greater with only two group members.
 
 ## Accomplishments that I'm proud of
-JP: This is one of the teammate's first ever web app ever deployed!
-Yang: This is the app I hope I could use to enroll in FULL UCI classes. After talking to friends with our app, all of us like this app. It has a specific targeted user groups and the feedbacks we got after talking to the user group is great! 
+JP: This is my first ever web app ever deployed!
+Yang: This is the app I hope I could use to enroll in FULL UCI classes. After talking to friends with our app, all of us like this app. It has a specific targeted user groups and the feedback we got after talking to the user group is great! 
 Every quarter, popular classes are quickly filled with students. The rest of students needs to refresh web pages over and over again to monitor the availability of the classes. When it comes the situation that the fulled classes are major-required or department-required classes (which is highly likely the reason why students compete to enroll), our app could be a life saver for UCI students who eagerly needs instant update for the availability of classes. All in all, I love our app!
 
 ## What I learned
 
 We learned: 
-- implementation of Python sqlite3 databased 
+- implementation of Python sqlite3 database
 - web application in Python, flask environment 
 - processing of HTML website
 - deployment our web app on Bluemix
